@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class PropertyController {
     private final PropertyService propertyService;
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'CAPTATION')")
     public ResponseEntity<PropertyResponseDto> create(@RequestBody @Valid PropertyDto dto){
         Property property = PropertyMapper.toPropertyEntity(dto);
         propertyService.create(property);
@@ -38,11 +40,13 @@ public class PropertyController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ADMIN', 'CAPTATION')")
     public void delete(@PathVariable Long id){
         propertyService.delete(id);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CAPTATION')")
     public ResponseEntity<PropertyResponseDto> edit(@PathVariable Long id, @Valid @RequestBody PropertyDto propertyDto){
         Property property = propertyService.edit(id, propertyDto);
         return ResponseEntity.ok().body(PropertyMapper.toPropertyDto(property));

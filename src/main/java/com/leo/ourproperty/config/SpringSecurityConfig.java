@@ -1,5 +1,6 @@
 package com.leo.ourproperty.config;
 
+import com.leo.ourproperty.jwt.JwtAuthenticationEntryPoint;
 import com.leo.ourproperty.jwt.JwtAuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,14 +29,15 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "api/v1/property").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/v1/auth").permitAll()
-                        .requestMatchers(HttpMethod.POST, "api/v1/user").permitAll() //mudar para apenas admin o POST
-
                         .anyRequest().authenticated()
                 ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 ).addFilterBefore(
                         jwtAuthtorizationFilter(),
                         UsernamePasswordAuthenticationFilter.class
+                ).exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+
                 ).build();
     }
 
