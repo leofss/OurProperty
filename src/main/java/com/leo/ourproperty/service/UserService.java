@@ -1,0 +1,93 @@
+package com.leo.ourproperty.service;
+
+import com.leo.ourproperty.entity.User;
+import com.leo.ourproperty.exception.CpfUniqueViolationException;
+import com.leo.ourproperty.exception.EmailUniqueViolationException;
+import com.leo.ourproperty.exception.EntityNotFoundExecption;
+import com.leo.ourproperty.repository.UserRepository;
+import com.leo.ourproperty.repository.projection.UserProjection;
+import com.leo.ourproperty.web.dto.UserDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    private User saveUserWithExceptionHandling(User user) {
+        try {
+            User savedUser = userRepository.save(user);
+            return savedUser;
+        } catch (DataIntegrityViolationException ex) {
+            String constraintName = ex.getMostSpecificCause().getMessage();
+            if (constraintName.contains("cpf")) {
+                throw new CpfUniqueViolationException(String.format("CPF %s já cadastrado", user.getCpf()));
+            } else if (constraintName.contains("email")) {
+                throw new EmailUniqueViolationException(String.format("E-mail %s já cadastrado", user.getEmail()));
+            }
+            throw ex;
+        }
+    }
+    @Transactional
+    public User create(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return saveUserWithExceptionHandling(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserProjection> findAll(Pageable pageable){
+        return userRepository.findAllPageable(pageable);
+    }
+
+    @Transactional
+    public void delete(Long id){
+        if(!userRepository.existsById(id)){
+            throw new EntityNotFoundExecption("User with id " + id + " not found");
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Transactional
+    public User edit(Long id, UserDto userDto){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundExecption("User with id " + id + " not found"));
+        if (!user.getCpf().equals(userDto.getCpf())) {
+            if (userRepository.existsByCpf(userDto.getCpf())) {
+                throw new CpfUniqueViolationException(String.format("User with CPF %s already exists", userDto.getCpf()));
+            }
+        }
+
+        if (!user.getEmail().equals(userDto.getEmail())) {
+            if (userRepository.existsByEmail(userDto.getEmail())) {
+                throw new CpfUniqueViolationException(String.format("User with Email %s already exists", userDto.getEmail()));
+            }
+        }
+
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(userDto, user);
+
+
+        return userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundExecption("User with email " + email + " not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public User.Role findRoleByEmail(String email){
+        return userRepository.findRoleByEmail(email);
+    }
+}
