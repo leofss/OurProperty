@@ -36,7 +36,7 @@ public class SpringSecurityConfig {
                         jwtAuthtorizationFilter(),
                         UsernamePasswordAuthenticationFilter.class
                 ).exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
 
                 ).build();
     }
