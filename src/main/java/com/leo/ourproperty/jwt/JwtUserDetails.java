@@ -13,8 +13,6 @@ public class JwtUserDetails extends User {
     public JwtUserDetails(com.leo.ourproperty.entity.User user) {
         super(user.getEmail(), user.getPassword(), AuthorityUtils.createAuthorityList(user.getRole().name()));
         this.user = user;
-        log.info("jwtuserdtais");
-        log.info(user.getName());
     }
 
     public Long getId(){

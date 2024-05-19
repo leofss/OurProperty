@@ -196,13 +196,15 @@ public class PropertyService {
         List<Property> results = finalQuery.getResultList();
 
         List<String> characteristics = (List<String>) searchParams.get("characteristics");
-        if(characteristics != null){
+
+        if(!characteristics.isEmpty()){
             results = results.stream()
                     .filter(property -> property.getCharacteristics().stream()
                             .anyMatch(characteristics::contains))
                     .collect(Collectors.toList());
             return new PageImpl<>(results, pageable, results.size());
         }
+
         return new PageImpl<>(results, pageable, results.size());
     }
 }
