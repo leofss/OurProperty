@@ -19,9 +19,12 @@ public class PageableDto {
 
     private int size;
 
-    @JsonProperty("pageElements")
+    @JsonProperty("page_elements")
     private int numberOfElements;
 
+    @JsonProperty("total_pages")
     private int totalPages;
+
+    @JsonProperty("total_elements")
     private int totalElements;
 }

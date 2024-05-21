@@ -11,6 +11,7 @@ import com.leo.ourproperty.web.dto.mapper.PropertyMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import java.util.List;
 @Slf4j
 public class PropertyController {
     private final PropertyService propertyService;
+
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CAPTATION')")
     public ResponseEntity<PropertyResponseDto> create(@RequestBody @Valid PropertyDto dto){
@@ -92,7 +94,7 @@ public class PropertyController {
         searchParams.put("squareroot_price", squarerootPrice);
         searchParams.put("characteristics", characteristics);
 
-        Page<Property> page = propertyService.search(searchParams, pageable);
+        Page<PropertyResponseDto> page = propertyService.search(searchParams, pageable);
         return ResponseEntity.ok(PageableMapper.pageableDto(page));
 
     }

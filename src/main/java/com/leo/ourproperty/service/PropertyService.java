@@ -5,6 +5,7 @@ import com.leo.ourproperty.exception.EntityNotFoundExecption;
 import com.leo.ourproperty.repository.PropertyRepository;
 import com.leo.ourproperty.repository.projection.PropertyProjection;
 import com.leo.ourproperty.web.dto.PropertyDto;
+import com.leo.ourproperty.web.dto.PropertyResponseDto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +76,7 @@ public class PropertyService {
     }
 
     @Transactional
-    public Page<Property> search(Map<String, Object> searchParams, Pageable pageable){
+    public PageImpl<PropertyResponseDto> search(Map<String, Object> searchParams, Pageable pageable){
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Property> criteriaQuery = criteriaBuilder.createQuery(Property.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -195,16 +195,22 @@ public class PropertyService {
 
         List<Property> results = finalQuery.getResultList();
 
+        ModelMapper modelMapper = new ModelMapper();
+        List<PropertyResponseDto> resultsDto = results.stream().map(element -> modelMapper
+                .map(element, PropertyResponseDto.class))
+                .toList();
+
+
         List<String> characteristics = (List<String>) searchParams.get("characteristics");
 
         if(!characteristics.isEmpty()){
-            results = results.stream()
+            resultsDto = resultsDto.stream()
                     .filter(property -> property.getCharacteristics().stream()
                             .anyMatch(characteristics::contains))
-                    .collect(Collectors.toList());
-            return new PageImpl<>(results, pageable, results.size());
+                    .toList();
+            return new PageImpl<>(resultsDto, pageable, results.size());
         }
 
-        return new PageImpl<>(results, pageable, results.size());
+        return new PageImpl<>(resultsDto, pageable, results.size());
     }
 }

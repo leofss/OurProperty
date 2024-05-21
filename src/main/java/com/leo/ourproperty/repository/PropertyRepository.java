@@ -34,6 +34,4 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     @Query("SELECT MAX(e.numParkingSpots) FROM Property e")
     Integer findMaxParkingSpots();
 
-    @Query("SELECT MAX(e.taxPrice) FROM Property e")
-    BigDecimal findMaxTaxPrice();
 }
