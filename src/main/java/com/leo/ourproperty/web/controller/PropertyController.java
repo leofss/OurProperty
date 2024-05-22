@@ -1,7 +1,6 @@
 package com.leo.ourproperty.web.controller;
 
 import com.leo.ourproperty.entity.Property;
-import com.leo.ourproperty.repository.projection.PropertyProjection;
 import com.leo.ourproperty.service.PropertyService;
 import com.leo.ourproperty.web.dto.PageableDto;
 import com.leo.ourproperty.web.dto.PropertyDto;
@@ -11,7 +10,6 @@ import com.leo.ourproperty.web.dto.mapper.PropertyMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -42,7 +40,7 @@ public class PropertyController {
 
     @GetMapping
     public ResponseEntity<PageableDto> getAll(Pageable pageable){
-        Page<PropertyProjection> property = propertyService.findAll(pageable);
+        Page<PropertyResponseDto> property = propertyService.findAll(pageable);
         return ResponseEntity.ok(PageableMapper.pageableDto(property));
     }
 

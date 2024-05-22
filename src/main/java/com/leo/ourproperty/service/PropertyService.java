@@ -33,6 +33,7 @@ import java.util.Random;
 public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final EntityManager entityManager;
+
     private static final Random random = new Random();
 
     public String generatePropertyCode(){
@@ -53,8 +54,12 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PropertyProjection> findAll(Pageable pageable){
-        return propertyRepository.findAllPageable(pageable);
+    public Page<PropertyResponseDto> findAll(Pageable pageable){
+        Page<PropertyProjection> propertyProjections = propertyRepository.findAllPageable(pageable);
+        ModelMapper modelMapper = new ModelMapper();
+
+        return propertyProjections.map(propertyProjection
+                -> modelMapper.map(propertyProjection, PropertyResponseDto.class));
     }
 
     @Transactional
