@@ -7,9 +7,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 
-import java.util.Optional;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PropertyMapper {
     public static Property toPropertyEntity(PropertyDto dto){
         return new ModelMapper().map(dto, Property.class);
