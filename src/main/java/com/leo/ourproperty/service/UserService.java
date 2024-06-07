@@ -60,16 +60,14 @@ public class UserService {
     public User edit(Long id, UserDto userDto){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundExecption("User with id " + id + " not found"));
-        if (!user.getCpf().equals(userDto.getCpf())) {
-            if (userRepository.existsByCpf(userDto.getCpf())) {
+        if (!user.getCpf().equals(userDto.getCpf()) && (userRepository.existsByCpf(userDto.getCpf()))) {
                 throw new CpfUniqueViolationException(String.format("User with CPF %s already exists", userDto.getCpf()));
-            }
+
         }
 
-        if (!user.getEmail().equals(userDto.getEmail())) {
-            if (userRepository.existsByEmail(userDto.getEmail())) {
+        if (!user.getEmail().equals(userDto.getEmail()) && (userRepository.existsByEmail(userDto.getEmail()))) {
                 throw new CpfUniqueViolationException(String.format("User with Email %s already exists", userDto.getEmail()));
-            }
+
         }
 
         ModelMapper modelMapper = new ModelMapper();
