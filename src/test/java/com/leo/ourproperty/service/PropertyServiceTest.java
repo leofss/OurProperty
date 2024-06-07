@@ -139,7 +139,6 @@ class PropertyServiceTest {
 
     @Test
     void shouldSearchPropertiesSuccessfully() {
-        // Given
         Map<String, Object> searchParams = new HashMap<>();
         searchParams.put("property_code", "OP1010");
         searchParams.put("title", "Sample Title");
@@ -158,7 +157,6 @@ class PropertyServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        // Stubbing the mocks
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(Property.class)).thenReturn(criteriaQuery);
         when(criteriaQuery.from(Property.class)).thenReturn(root);
@@ -172,14 +170,11 @@ class PropertyServiceTest {
         when(propertyRepository.findMaxNumSuite()).thenReturn(2);
         when(propertyRepository.findMaxParkingSpots()).thenReturn(3);
 
-        // When
         PageImpl<PropertyResponseDto> result = propertyService.search(searchParams, pageable);
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
 
-        // Verify interactions
         verify(entityManager).getCriteriaBuilder();
         verify(criteriaBuilder).createQuery(Property.class);
         verify(criteriaQuery).from(Property.class);
@@ -195,14 +190,11 @@ class PropertyServiceTest {
 
     @Test
     void shouldDeletePropertySuccessfully() {
-        // Given
         Long propertyId = 1L;
         when(propertyRepository.existsById(propertyId)).thenReturn(true);
 
-        // When
         propertyService.delete(propertyId);
 
-        // Then
         verify(propertyRepository, times(1)).deleteById(propertyId);
     }
 
