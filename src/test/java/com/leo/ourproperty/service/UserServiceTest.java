@@ -14,11 +14,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,6 +130,7 @@ class UserServiceTest {
         verify(userRepository, times(1)).findByEmail(email);
     }
 
+    @Test
     void shouldFindRoleByEmail() {
         String email = "test@example.com";
         User.Role expectedRole = User.Role.ADMIN;
@@ -149,5 +152,49 @@ class UserServiceTest {
 
         assertNull(result);
         verify(userRepository, times(1)).findRoleByEmail(email);
+    }
+
+    @Test
+    void shouldFindAll(){
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        UserProjection userProjection = new UserProjection() {
+            @Override
+            public String getEmail() {
+                return "test@example.com";
+            }
+
+            @Override
+            public String getCpf() {
+                return "44479235051";
+            }
+
+            @Override
+            public String getPassword() {
+                return "1234";
+            }
+
+            @Override
+            public String getName() {
+                return "Test User";
+            }
+
+        };
+        Page<UserProjection> userProjections = new PageImpl<>(Collections.singletonList(userProjection));
+
+        when(userRepository.findAllPageable(pageable)).thenReturn(userProjections);
+
+        // Act
+        Page<UserProjection> result = userService.findAll(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(userProjection.getEmail(), result.getContent().get(0).getEmail());
+        assertEquals(userProjection.getName(), result.getContent().get(0).getName());
+        assertEquals(userProjection.getCpf(), result.getContent().get(0).getCpf());
+        assertEquals(userProjection.getPassword(), result.getContent().get(0).getPassword());
+
+        verify(userRepository, times(1)).findAllPageable(pageable);
     }
 }
