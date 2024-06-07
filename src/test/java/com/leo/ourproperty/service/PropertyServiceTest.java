@@ -3,6 +3,7 @@ package com.leo.ourproperty.service;
 
 import com.leo.ourproperty.entity.Property;
 import com.leo.ourproperty.repository.PropertyRepository;
+import com.leo.ourproperty.repository.projection.PropertyProjection;
 import com.leo.ourproperty.web.dto.PropertyDto;
 import com.leo.ourproperty.web.dto.PropertyResponseDto;
 import jakarta.persistence.EntityManager;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -196,6 +198,107 @@ class PropertyServiceTest {
         propertyService.delete(propertyId);
 
         verify(propertyRepository, times(1)).deleteById(propertyId);
+    }
+
+    @Test
+    void shouldFindAll() {
+        Pageable pageable = PageRequest.of(0, 10);
+        PropertyProjection propertyProjection = new PropertyProjection() {
+            @Override
+            public String getPropertyCode() {
+                return "OP0000";
+            }
+
+            @Override
+            public String getTitle() {
+                return "Test Property";
+            }
+
+            @Override
+            public Double getArea() {
+                return 120.0;
+            }
+
+            @Override
+            public Double getTotalArea() {
+                return 200.0;
+            }
+
+            @Override
+            public int getNumBathrooms() {
+                return 2;
+            }
+
+            @Override
+            public int getNumBedrooms() {
+                return 3;
+            }
+
+            @Override
+            public int getNumSuite() {
+                return 1;
+            }
+
+            @Override
+            public int getNumParkingSpots() {
+                return 2;
+            }
+
+            @Override
+            public String getDescription() {
+                return "A beautiful property";
+            }
+
+            @Override
+            public String getAddress() {
+                return "123 Test Street";
+            }
+
+            @Override
+            public BigDecimal getCondoPrice() {
+                return new BigDecimal("250.00");
+            }
+
+            @Override
+            public BigDecimal getTaxPrice() {
+                return new BigDecimal("100.00");
+            }
+
+            @Override
+            public BigDecimal getSquarerootPrice() {
+                return new BigDecimal("3000.00");
+            }
+
+            @Override
+            public List<String> getCharacteristics() {
+                return Collections.singletonList("Characteristic 1");
+            }
+        };
+        Page<PropertyProjection> propertyProjections = new PageImpl<>(Collections.singletonList(propertyProjection));
+
+        when(propertyRepository.findAllPageable(pageable)).thenReturn(propertyProjections);
+
+        Page<PropertyResponseDto> result = propertyService.findAll(pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        PropertyResponseDto responseDto = result.getContent().get(0);
+        assertEquals(propertyProjection.getPropertyCode(), responseDto.getPropertyCode());
+        assertEquals(propertyProjection.getTitle(), responseDto.getTitle());
+        assertEquals(propertyProjection.getArea(), responseDto.getArea());
+        assertEquals(propertyProjection.getTotalArea(), responseDto.getTotalArea());
+        assertEquals(propertyProjection.getNumBathrooms(), responseDto.getNumBathrooms());
+        assertEquals(propertyProjection.getNumBedrooms(), responseDto.getNumBedrooms());
+        assertEquals(propertyProjection.getNumSuite(), responseDto.getNumSuite());
+        assertEquals(propertyProjection.getNumParkingSpots(), responseDto.getNumParkingSpots());
+        assertEquals(propertyProjection.getDescription(), responseDto.getDescription());
+        assertEquals(propertyProjection.getAddress(), responseDto.getAddress());
+        assertEquals(propertyProjection.getCondoPrice(), responseDto.getCondoPrice());
+        assertEquals(propertyProjection.getTaxPrice(), responseDto.getTaxPrice());
+        assertEquals(propertyProjection.getSquarerootPrice(), responseDto.getSquarerootPrice());
+        assertEquals(propertyProjection.getCharacteristics(), responseDto.getCharacteristics());
+
+        verify(propertyRepository, times(1)).findAllPageable(pageable);
     }
 
 
