@@ -1,5 +1,6 @@
 package com.leo.ourproperty.service;
 
+import com.leo.ourproperty.entity.EmailMessage;
 import com.leo.ourproperty.entity.User;
 import com.leo.ourproperty.exception.CpfUniqueViolationException;
 import com.leo.ourproperty.exception.EmailUniqueViolationException;
@@ -10,6 +11,7 @@ import com.leo.ourproperty.web.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,20 +24,35 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RabbitTemplate rabbitTemplate;
 
     private User saveUserWithExceptionHandling(User user) {
         try {
-            User savedUser = userRepository.save(user);
-            return savedUser;
+            sendWelcomeEmail(user);
+            return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
-            String constraintName = ex.getMostSpecificCause().getMessage();
-            if (constraintName.contains("cpf")) {
-                throw new CpfUniqueViolationException(String.format("CPF %s já cadastrado", user.getCpf()));
-            } else if (constraintName.contains("email")) {
-                throw new EmailUniqueViolationException(String.format("E-mail %s já cadastrado", user.getEmail()));
-            }
-            throw ex;
+            handleDataIntegrityViolationException(ex, user);
+            return null;
         }
+    }
+
+    private void sendWelcomeEmail(User user) {
+        EmailMessage emailMessage = new EmailMessage(
+                user.getEmail(),
+                "Welcome to OurProperty",
+                "Your account was successfully created"
+        );
+        rabbitTemplate.convertAndSend("emailQueue", emailMessage);
+    }
+
+    private void handleDataIntegrityViolationException(DataIntegrityViolationException ex, User user) {
+        String constraintName = ex.getMostSpecificCause().getMessage();
+        if (constraintName.contains("cpf")) {
+            throw new CpfUniqueViolationException(String.format("CPF %s já cadastrado", user.getCpf()));
+        } else if (constraintName.contains("email")) {
+            throw new EmailUniqueViolationException(String.format("E-mail %s já cadastrado", user.getEmail()));
+        }
+        throw ex;
     }
     @Transactional
     public User create(User user){
