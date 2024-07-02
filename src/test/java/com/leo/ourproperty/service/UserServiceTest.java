@@ -1,7 +1,10 @@
 package com.leo.ourproperty.service;
 
+import com.leo.ourproperty.entity.EmailMessage;
 import com.leo.ourproperty.entity.Property;
 import com.leo.ourproperty.entity.User;
+import com.leo.ourproperty.exception.CpfUniqueViolationException;
+import com.leo.ourproperty.exception.EmailUniqueViolationException;
 import com.leo.ourproperty.exception.EntityNotFoundExecption;
 import com.leo.ourproperty.repository.UserRepository;
 import com.leo.ourproperty.repository.projection.UserProjection;
@@ -12,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +44,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
     @BeforeEach
     void setUp() throws Exception{
         MockitoAnnotations.openMocks(this);
@@ -61,7 +69,9 @@ class UserServiceTest {
     @Test
     void shouldSuccessfullySaveUser() {
         User user = initializeUser();
+        user.setPassword("encodedPassword");
 
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User userCreated = userService.create(user);
@@ -72,6 +82,38 @@ class UserServiceTest {
         assertEquals(user.getCpf(), userCreated.getCpf());
         assertEquals(user.getRole().name(), userCreated.getRole().name());
         assertEquals(user.getPassword(), userCreated.getPassword());
+
+        verify(rabbitTemplate, times(1)).convertAndSend(eq("emailQueue"), any(EmailMessage.class));
+    }
+
+    @Test
+    void shouldHandleCpfUniqueViolationException() {
+        User user = initializeUser();
+        user.setPassword("encodedPassword");
+
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("cpf"));
+
+        CpfUniqueViolationException exception = assertThrows(CpfUniqueViolationException.class, () -> {
+            userService.create(user);
+        });
+
+        assertEquals(String.format("CPF %s já cadastrado", user.getCpf()), exception.getMessage());
+    }
+
+    @Test
+    void shouldHandleEmailUniqueViolationException() {
+        User user = initializeUser();
+        user.setPassword("encodedPassword");
+
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("email"));
+
+        EmailUniqueViolationException exception = assertThrows(EmailUniqueViolationException.class, () -> {
+            userService.create(user);
+        });
+
+        assertEquals(String.format("E-mail %s já cadastrado", user.getEmail()), exception.getMessage());
     }
 
     @Test
