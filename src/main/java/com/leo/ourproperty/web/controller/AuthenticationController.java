@@ -1,14 +1,12 @@
 package com.leo.ourproperty.web.controller;
 
-import com.leo.ourproperty.entity.User;
+import com.leo.ourproperty.exception.EntityNotFoundExecption;
 import com.leo.ourproperty.jwt.JwtToken;
 import com.leo.ourproperty.jwt.JwtUserDetailsService;
-import com.leo.ourproperty.web.dto.UserDto;
 import com.leo.ourproperty.web.dto.UserLoginDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 @RestController
+
 public class AuthenticationController {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final AuthenticationManager authenticationManager;
@@ -36,7 +35,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(token);
 
         }catch (AuthenticationException ex){
+            throw new EntityNotFoundExecption("User with email " + userLoginDto.getEmail() + " not found");
         }
-        return null;
     }
 }
