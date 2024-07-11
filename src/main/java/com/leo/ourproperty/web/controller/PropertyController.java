@@ -7,6 +7,7 @@ import com.leo.ourproperty.web.dto.PropertyDto;
 import com.leo.ourproperty.web.dto.PropertyResponseDto;
 import com.leo.ourproperty.web.dto.mapper.PageableMapper;
 import com.leo.ourproperty.web.dto.mapper.PropertyMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class PropertyController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CAPTATION')")
+    @Operation(summary = "Create property", description = "Available only  to users with ADMIN and CAPTATION roles")
     public ResponseEntity<PropertyResponseDto> create(@RequestBody @Valid PropertyDto dto){
         Property property = PropertyMapper.toPropertyEntity(dto);
         propertyService.create(property);
@@ -39,6 +41,7 @@ public class PropertyController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all properties", description = "Available for all roles")
     public ResponseEntity<PageableDto> getAll(Pageable pageable){
         Page<PropertyResponseDto> property = propertyService.findAll(pageable);
         return ResponseEntity.ok(PageableMapper.pageableDto(property));
@@ -47,18 +50,21 @@ public class PropertyController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CAPTATION')")
+    @Operation(summary = "Delete single property", description = "Available only for users with ADMIN and CAPTATION roles")
     public void delete(@PathVariable Long id){
         propertyService.delete(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'CAPTATION')")
+    @Operation(summary = "Edit single property", description = "Available only for users with ADMIN and CAPTATION roles")
     public ResponseEntity<PropertyResponseDto> edit(@PathVariable Long id, @Valid @RequestBody PropertyDto propertyDto){
         Property property = propertyService.edit(id, propertyDto);
         return ResponseEntity.ok().body(PropertyMapper.toPropertyDto(property));
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search and filter all properties", description = "Available for all roles")
     public ResponseEntity<PageableDto> search(
             @RequestParam(required = false, name = "property_code") String propertyCode,
             @RequestParam(required = false, name = "title") String title,

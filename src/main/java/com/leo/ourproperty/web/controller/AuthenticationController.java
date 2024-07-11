@@ -4,6 +4,7 @@ import com.leo.ourproperty.exception.EntityNotFoundExecption;
 import com.leo.ourproperty.jwt.JwtToken;
 import com.leo.ourproperty.jwt.JwtUserDetailsService;
 import com.leo.ourproperty.web.dto.UserLoginDto;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class AuthenticationController {
 
 
     @PostMapping
+    @Operation(summary = "User authentication")
     public ResponseEntity<?> authenticate(@RequestBody @Valid UserLoginDto userLoginDto, HttpServletRequest req){
         try {
             UsernamePasswordAuthenticationToken authenticationToken =

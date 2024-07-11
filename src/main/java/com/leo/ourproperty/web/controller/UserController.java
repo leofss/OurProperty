@@ -8,6 +8,7 @@ import com.leo.ourproperty.web.dto.*;
 import com.leo.ourproperty.web.dto.mapper.PageableMapper;
 import com.leo.ourproperty.web.dto.mapper.PropertyMapper;
 import com.leo.ourproperty.web.dto.mapper.UserMapper;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ public class UserController {
     private final UserService userService;
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Create user", description = "Available only for users with ADMIN role")
     public ResponseEntity<UserResponseDto> create(@RequestBody @Valid UserDto userDto){
         User user = UserMapper.toUserEntity(userDto);
         userService.create(user);
@@ -32,6 +34,7 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Get all users", description = "Available only for users with ADMIN role")
     public ResponseEntity<PageableDto> getAll(Pageable pageable){
         Page<UserProjection> user = userService.findAll(pageable);
         return ResponseEntity.ok(PageableMapper.pageableDto(user));
@@ -40,12 +43,14 @@ public class UserController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Delete single user", description = "Available only for users with ADMIN role")
     public void delete(@PathVariable Long id){
         userService.delete(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Edit single user", description = "Available only for users with ADMIN role")
     public ResponseEntity<UserResponseDto> edit(@PathVariable Long id, @Valid @RequestBody UserDto userDto){
         User user = userService.edit(id, userDto);
         return ResponseEntity.ok().body(UserMapper.toUserDto(user));
