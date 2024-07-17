@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -37,7 +38,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(token);
 
         }catch (AuthenticationException ex){
-            throw new EntityNotFoundExecption("User with email " + userLoginDto.getEmail() + " not found");
+            throw new AccessDeniedException("Invalid credentials");
         }
     }
 }
