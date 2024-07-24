@@ -28,8 +28,9 @@ public class UserService {
 
     private User saveUserWithExceptionHandling(User user) {
         try {
-            sendWelcomeEmail(user);
-            return userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            sendWelcomeEmail(savedUser);
+            return savedUser;
         } catch (DataIntegrityViolationException ex) {
             handleDataIntegrityViolationException(ex, user);
             return null;
