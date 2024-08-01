@@ -2,31 +2,27 @@ package com.leo.ourproperty.web.controller;
 
 import com.leo.ourproperty.entity.Property;
 import com.leo.ourproperty.service.PropertyService;
-import com.leo.ourproperty.utils.SearchParamsBuilder;
+import com.leo.ourproperty.repository.search.SearchParamsBuilder;
+import com.leo.ourproperty.web.api.PropertyAPI;
 import com.leo.ourproperty.web.dto.PageableDto;
 import com.leo.ourproperty.web.dto.PropertyDto;
 import com.leo.ourproperty.web.dto.PropertyResponseDto;
 import com.leo.ourproperty.web.dto.mapper.PageableMapper;
 import com.leo.ourproperty.web.dto.mapper.PropertyMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 @RequiredArgsConstructor
 @RestController
-public class PropertyController implements PropertyAPI{
+public class PropertyController implements PropertyAPI {
     private final PropertyService propertyService;
 
     @Override

@@ -3,6 +3,7 @@ package com.leo.ourproperty.web.controller;
 import com.leo.ourproperty.exception.EntityNotFoundExecption;
 import com.leo.ourproperty.jwt.JwtToken;
 import com.leo.ourproperty.jwt.JwtUserDetailsService;
+import com.leo.ourproperty.web.api.AuthenticationAPI;
 import com.leo.ourproperty.web.dto.UserLoginDto;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,18 +19,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 @RestController
 
-public class AuthenticationController {
+public class AuthenticationController implements AuthenticationAPI {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final AuthenticationManager authenticationManager;
 
 
-    @PostMapping
-    @Operation(summary = "User authentication")
-    public ResponseEntity<?> authenticate(@RequestBody @Valid UserLoginDto userLoginDto, HttpServletRequest req){
+    @Override
+    public ResponseEntity<?> authenticate(UserLoginDto userLoginDto, HttpServletRequest req) {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userLoginDto.getEmail(), userLoginDto.getPassword());

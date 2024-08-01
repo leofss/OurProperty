@@ -1,4 +1,4 @@
-package com.leo.ourproperty.web.controller;
+package com.leo.ourproperty.web.api;
 
 import com.leo.ourproperty.web.dto.PageableDto;
 import com.leo.ourproperty.web.dto.PropertyDto;

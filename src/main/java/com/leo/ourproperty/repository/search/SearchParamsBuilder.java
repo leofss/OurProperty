@@ -1,4 +1,4 @@
-package com.leo.ourproperty.utils;
+package com.leo.ourproperty.repository.search;
 
 import lombok.extern.slf4j.Slf4j;
 
